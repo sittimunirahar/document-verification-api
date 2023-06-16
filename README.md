@@ -96,12 +96,12 @@
     **Test name:** DocumentVerificationTest
 
     **Test covers:**
-    - authenticated user successfully verify document      
-    - authenticated user successfully verify document with incomplete data
-    - unauthenticated user cannot verify any document
-    - authenticated user only can submit file bigger than 2MB
-    - authenticated user only can submit file in json   
-    - verification result stored in database
+    - authorized user able to verify document      
+    - authorized user able to verify document with incomplete data
+    - authorized user is not allowed to upload file bigger than 2MB
+    - authorized user is only able to upload file in json
+    - unauthorized user is not allowed to verify document
+    - stores verification result in database
 
 3. Unit tests
    
