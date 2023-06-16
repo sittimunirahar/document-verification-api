@@ -3,32 +3,20 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use App\Models\DocumentVerificationResult;
 use App\Services\DocumentValidatorService;
 use Illuminate\Support\Facades\Auth;
 
 class DocumentVerificationService
 {
-  const VERIFIED = 'verified';
   const FILE_TYPE = 'json';
   const ERROR_STORE_RESULT = 'An error occurred while storing the result.';
 
   public function verify(Request $request): array
   {
-    $file = $request->file('file');
-    $requestData = $this->transformToJson($file);
-
     $validator = new DocumentValidatorService();
+    $requestData = $this->transformToJson($request);
     $result = $validator->validate($requestData);
-
-    try {
-      $this->storeResult($result);
-    } catch (\Exception $e) {
-      return [
-        'error' => self::ERROR_STORE_RESULT,
-      ];
-    }
 
     $issuerName = $requestData['data']['issuer']['name'];
     $verificationResult = [
@@ -36,11 +24,18 @@ class DocumentVerificationService
       'result' => $result,
     ];
 
+    try {
+      $this->storeResult($result);
+    } catch (\Exception $e) {
+      $verificationResult['error'] = self::ERROR_STORE_RESULT;
+    }
+
     return $verificationResult;
   }
 
-  public function transformToJson(UploadedFile $file): array
+  public function transformToJson(Request $request): array
   {
+    $file = $request->file('file');
     $fileContent = file_get_contents($file->path());
     $jsonContent = json_decode($fileContent, true);
 
@@ -75,11 +70,11 @@ class DocumentVerificationService
     ];
   }
 
-  public function storeResult(string $result)
+  public function storeResult(string $result): void
   {
     $verificationResult = new DocumentVerificationResult();
     $verificationResult->user_id = Auth::id();
-    $verificationResult->file_type = DocumentVerificationService::FILE_TYPE;
+    $verificationResult->file_type = self::FILE_TYPE;
     $verificationResult->result = $result;
     $verificationResult->save();
   }

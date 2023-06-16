@@ -14,4 +14,6 @@ use App\Http\Controllers\DocumentVerificationController;
 |
 */
 
-Route::post('document_verification', DocumentVerificationController::class)->middleware('auth');
+Route::post('document_verification', DocumentVerificationController::class)
+  ->middleware('auth')
+  ->name('document.verification');

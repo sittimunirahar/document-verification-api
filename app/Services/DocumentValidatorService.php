@@ -11,8 +11,10 @@ class DocumentValidatorService
   const INVALID_RECIPIENT = 'invalid_recipient';
   const INVALID_ISSUER = 'invalid_issuer';
   const INVALID_SIGNATURE = 'invalid_signature';
+  const VERIFIED = 'verified';
 
-  const STANDARD_DNS_RR_TYPE = 16;
+  const DNS_RR_TYPE = 16;
+  const DNS_URL = "https://dns.google/resolve";
   const DNS_TYPE = 'TXT';
 
   const HASHING_ALGO = 'sha256';
@@ -26,9 +28,8 @@ class DocumentValidatorService
     $result = match (true) {
       !$recipientValidationResult->isValid() => $recipientValidationResult->getErrorMessage(),
       !$issuerValidationResult->isValid() =>  $issuerValidationResult->getErrorMessage(),
-      !$signatureValidationResult->isValid() =>
-      $signatureValidationResult->getErrorMessage(),
-      default => DocumentVerificationService::VERIFIED,
+      !$signatureValidationResult->isValid() => $signatureValidationResult->getErrorMessage(),
+      default => self::VERIFIED,
     };
 
     return $result;
@@ -36,9 +37,9 @@ class DocumentValidatorService
 
   public function validateRecipient(array $verificationResource): DocumentValidationResult
   {
-    $recipient = $verificationResource['data']['recipient'];
+    $recipient = $verificationResource['data']['recipient'] ?? '';
 
-    $isValid = $recipient['name'] && $recipient['email'];
+    $isValid = $recipient['name'] ?? null && $recipient['email'] ?? null;
     $errorMessage = !$isValid ? self::INVALID_RECIPIENT : '';
 
     return new DocumentValidationResult($isValid, $errorMessage);
@@ -46,7 +47,7 @@ class DocumentValidatorService
 
   public function validateIssuer(array $verificationResource): DocumentValidationResult
   {
-    $issuer = $verificationResource['data']['issuer'];
+    $issuer = $verificationResource['data']['issuer'] ?? '';
 
     $issuerName = $issuer['name'] ?? null;
     $identityProof = $issuer['identityProof'] ?? null;
@@ -71,20 +72,23 @@ class DocumentValidatorService
   {
     $foundKey = false;
     $client = new Client();
-    $promise = $client->getAsync("https://dns.google/resolve", [
+
+    // This block defines the success and failure callbacks for the DNS lookup promise.
+    $promise = $client->getAsync(self::DNS_URL, [
       'query' => [
         'name' => $location,
         'type' => self::DNS_TYPE,
       ],
     ]);
 
+    // Checks DNS records for provided key and returns validation result
     $promise->then(
       function ($response) use ($key, &$foundKey) {
         $dnsRecords = json_decode($response->getBody(), true) ?? null;
 
         if ($dnsRecords && isset($dnsRecords['Answer'])) {
           foreach ($dnsRecords['Answer'] as $record) {
-            if ($record['type'] == self::STANDARD_DNS_RR_TYPE && strpos($record['data'], $key) !== false) {
+            if ($record['type'] == self::DNS_RR_TYPE && strpos($record['data'], $key) !== false) {
               $foundKey = true;
               break;
             }
@@ -101,7 +105,7 @@ class DocumentValidatorService
 
   public function validateSignature(array $verificationResource): DocumentValidationResult
   {
-    $targetHash = $verificationResource['signature']['targetHash'];
+    $targetHash = $verificationResource['signature']['targetHash'] ?? '';
 
     $propertyPaths = $this->buildPropertyPath($verificationResource['data']);
     $hashedPropertyPaths = $this->hashPropertyPath($propertyPaths);
@@ -113,6 +117,7 @@ class DocumentValidatorService
     return new DocumentValidationResult($isValid, $errorMessage);
   }
 
+  // Flattens a nested array into a new array with keys as property paths
   private function buildPropertyPath(array $data, string $prefix = ''): array
   {
     $results = [];
@@ -130,6 +135,8 @@ class DocumentValidatorService
     return $results;
   }
 
+  // Sort all the generated hashes alphabetically and hash them all together using specified hashing algorithm. 
+  // This will provide the target hash of the file.
   private function hashPropertyPath(array $propertyPaths): array
   {
     $hashList = [];

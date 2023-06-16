@@ -1,10 +1,10 @@
 <?php
 
-include_once __DIR__ . '/TestConstants.php';
+include_once 'tests/TestConstants.php';
 
-use App\Http\Controllers\DocumentVerificationController;
 use App\Models\User;
-use App\Services\DocumentVerificationService;
+use App\Services\DocumentValidatorService;
+use App\Http\Controllers\DocumentVerificationController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -15,12 +15,12 @@ beforeEach(function () {
   $this->userId = $this->user->id;
   Storage::fake('public');
 
-  $jsonString = json_encode(FORMATTED_DOCUMENT_DATA_COMPLETE);
-  $this->file = UploadedFile::fake()->createWithContent('document.json', $jsonString);
+  $fileContent = json_encode(FORMATTED_DOCUMENT_DATA_COMPLETE);
+  $this->file = UploadedFile::fake()->createWithContent('document.json', $fileContent);
 });
 
-test('authenticated user successfully verify document', function () {
-  $response = $this->postJson('/api/document_verification', [
+test('authorized user verifies document', function () {
+  $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $this->file,
   ]);
 
@@ -28,17 +28,17 @@ test('authenticated user successfully verify document', function () {
     ->assertJson(
       fn (AssertableJson $json) =>
       $json
-        ->where('result', DocumentVerificationService::VERIFIED)
+        ->where('result', DocumentValidatorService::VERIFIED)
         ->etc()
     )
     ->assertStatus(HTTP_POST_SUCCESS);
 });
 
-test('authenticated user successfully verify document with incomplete data', function () {
-  $jsonStringIncomplete = json_encode(FORMATTED_DOCUMENT_DATA_INCOMPLETE);
-  $this->file = UploadedFile::fake()->createWithContent('document.json', $jsonStringIncomplete);
+test('authorized user verifies document with incomplete data', function () {
+  $incompleteFileContent = json_encode(DOCUMENT_DATA_WITHOUT_ISSUER);
+  $this->file = UploadedFile::fake()->createWithContent('document.json', $incompleteFileContent);
 
-  $response = $this->postJson('/api/document_verification', [
+  $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $this->file,
   ]);
 
@@ -46,19 +46,19 @@ test('authenticated user successfully verify document with incomplete data', fun
     ->assertJson(
       fn (AssertableJson $json) =>
       $json
-        ->whereNot('result', DocumentVerificationService::VERIFIED)
+        ->whereNot('result', DocumentValidatorService::VERIFIED)
         ->etc()
     )
     ->assertStatus(HTTP_POST_SUCCESS);
 });
 
-test('unauthenticated user cannot verify any document', function () {
+test('unauthorized user not allowed to verify document', function () {
   $localFile = $this->file;
 
   $this->refreshApplication();
   $this->assertGuest();
 
-  $response = $this->postJson('/api/document_verification', [
+  $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $localFile,
   ]);
 
@@ -67,44 +67,26 @@ test('unauthenticated user cannot verify any document', function () {
 
 test('authenticated user only can submit file bigger than 2MB', function () {
   $file = UploadedFile::fake()->image('document.json', 3000, 3000)->size(DocumentVerificationController::MAX_FILE_SIZE + 1);
-  $response = $this->postJson('/api/document_verification', [
+  $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $file,
   ]);
 
-  $expectedResponse = [
-    'message' => 'The file field must not be greater than 2048 kilobytes.',
-    'errors' => [
-      'file' => [
-        'The file field must not be greater than 2048 kilobytes.'
-      ]
-    ]
-  ];
-
-  $response->assertStatus(HTTP_POST_VALIDATION_FAILED)
-    ->assertJson($expectedResponse);
+  $response->assertStatus(HTTP_POST_DOCUMENT_NOT_SUPPORTED)
+    ->assertJson(EXPECTED_INVALID_FILE_SIZE_MESSAGE);
 });
 
 test('authenticated user only can submit file in json', function () {
   $file = UploadedFile::fake()->createWithContent('document.pdf', 'hello');
-  $response = $this->postJson('/api/document_verification', [
+  $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $file,
   ]);
 
-  $expectedResponse = [
-    'message' => 'The file field must be a file of type: json.',
-    'errors' => [
-      'file' => [
-        'The file field must be a file of type: json.'
-      ]
-    ]
-  ];
-
-  $response->assertStatus(HTTP_POST_VALIDATION_FAILED)
-    ->assertJson($expectedResponse);
+  $response->assertStatus(HTTP_POST_DOCUMENT_NOT_SUPPORTED)
+    ->assertJson(EXPECTED_INVALID_FILE_TYPE_MESSAGE);
 });
 
 test('verification result stored in database', function () {
-  $response = $this->postJson('/api/document_verification', [
+  $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $this->file,
   ]);
 
@@ -114,6 +96,6 @@ test('verification result stored in database', function () {
   $this->assertDatabaseHas('verification_results', [
     'user_id' => $this->userId,
     'file_type' => DocumentVerificationController::SUPPORTED_FORMAT,
-    'result' => DocumentVerificationService::VERIFIED,
+    'result' => DocumentValidatorService::VERIFIED,
   ]);
 });
