@@ -4,7 +4,7 @@ Project: document-verification-api
 
 1. Improve error handling to be more precise.
    - Handle specific exceptions or create custom exception classes for better error handling and debugging
-   - For instance, checking the value of result.
+   - For instance, checking the value of verification result.
 2. Add logging mechanism.
 3. Update test files and refactor what's necessary to make code readable. Explore pest test more.
    - Group test cases
