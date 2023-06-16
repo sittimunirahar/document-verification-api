@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Http\Requests\DocumentVerificationRequest;
-use Illuminate\Http\Request;
 use App\Models\DocumentVerificationResult;
 use App\Services\DocumentValidatorService;
 use Illuminate\Support\Facades\Auth;
@@ -12,11 +11,15 @@ class DocumentVerificationService
 {
   const ERROR_STORE_RESULT = 'An error occurred while storing the result.';
 
-  public function verify(Request $request): array
+  public function __construct(protected DocumentValidatorService $validatorService)
   {
-    $validator = new DocumentValidatorService();
+  }
+
+  public function verify(DocumentVerificationRequest $request): array
+  {
     $requestData = $this->transformToJson($request);
-    $result = $validator->validate($requestData);
+
+    $result = $this->validatorService->validate($requestData);
 
     $issuerName = $requestData['data']['issuer']['name'];
     $verificationResult = [
@@ -33,7 +36,7 @@ class DocumentVerificationService
     return $verificationResult;
   }
 
-  public function transformToJson(Request $request): array
+  public function transformToJson(DocumentVerificationRequest $request): array
   {
     $file = $request->file('file');
     $fileContent = file_get_contents($file->path());
@@ -43,7 +46,7 @@ class DocumentVerificationService
     return $transformedData;
   }
 
-  public function formatData(array $jsonContent): array
+  public function formatData(?array $jsonContent): array
   {
     return [
       'data' => [

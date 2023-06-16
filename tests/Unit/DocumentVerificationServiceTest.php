@@ -6,7 +6,6 @@ use App\Http\Requests\DocumentVerificationRequest;
 use App\Models\User;
 use App\Services\DocumentValidatorService;
 use App\Services\DocumentVerificationService;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
 beforeEach(function () {
@@ -16,7 +15,7 @@ beforeEach(function () {
   $fileContent = json_encode(FORMATTED_DOCUMENT_DATA_COMPLETE);
   $this->file = UploadedFile::fake()->createWithContent('document.json', $fileContent);
 
-  $this->request = new Request();
+  $this->request = new DocumentVerificationRequest();
   $this->request->files->set('file', $this->file);
 });
 
@@ -28,6 +27,10 @@ test('transforms file content to JSON', function () {
 });
 
 test('verifies document', function () {
+  $this->validator
+    ->shouldReceive('validate')
+    ->once();
+
   $result = $this->service->verify($this->request);
   $this->assertIsArray($result);
   $this->assertArrayHasKey('issuer', $result);
