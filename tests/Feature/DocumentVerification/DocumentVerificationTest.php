@@ -4,7 +4,7 @@ include_once 'tests/TestConstants.php';
 
 use App\Models\User;
 use App\Services\DocumentValidatorService;
-use App\Http\Controllers\DocumentVerificationController;
+use App\Http\Requests\DocumentVerificationRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -53,7 +53,7 @@ test('authorized user able to verify document with incomplete data', function ()
 });
 
 test('authorized user is not allowed to upload file bigger than 2MB', function () {
-  $file = UploadedFile::fake()->image('document.json', 3000, 3000)->size(DocumentVerificationController::MAX_FILE_SIZE + 1);
+  $file = UploadedFile::fake()->image('document.json', 3000, 3000)->size(DocumentVerificationRequest::MAX_FILE_SIZE + 1);
   $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $file,
   ]);
@@ -95,7 +95,7 @@ test('stores verification result in database', function () {
 
   $this->assertDatabaseHas('verification_results', [
     'user_id' => $this->userId,
-    'file_type' => DocumentVerificationController::SUPPORTED_FORMAT,
+    'file_type' => DocumentVerificationRequest::SUPPORTED_FILE_FORMAT,
     'result' => DocumentValidatorService::VERIFIED,
   ]);
 });

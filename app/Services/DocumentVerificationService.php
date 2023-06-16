@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Requests\DocumentVerificationRequest;
 use Illuminate\Http\Request;
 use App\Models\DocumentVerificationResult;
 use App\Services\DocumentValidatorService;
@@ -9,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class DocumentVerificationService
 {
-  const FILE_TYPE = 'json';
   const ERROR_STORE_RESULT = 'An error occurred while storing the result.';
 
   public function verify(Request $request): array
@@ -74,7 +74,7 @@ class DocumentVerificationService
   {
     $verificationResult = new DocumentVerificationResult();
     $verificationResult->user_id = Auth::id();
-    $verificationResult->file_type = self::FILE_TYPE;
+    $verificationResult->file_type = DocumentVerificationRequest::SUPPORTED_FILE_FORMAT;
     $verificationResult->result = $result;
     $verificationResult->save();
   }

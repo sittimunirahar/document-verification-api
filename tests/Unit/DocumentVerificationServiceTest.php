@@ -2,6 +2,7 @@
 
 include_once 'tests/TestConstants.php';
 
+use App\Http\Requests\DocumentVerificationRequest;
 use App\Models\User;
 use App\Services\DocumentValidatorService;
 use App\Services\DocumentVerificationService;
@@ -51,7 +52,7 @@ test('stores verification results', function () {
 
   $this->assertDatabaseHas('verification_results', [
     'user_id' => $user->id,
-    'file_type' => DocumentVerificationService::FILE_TYPE,
+    'file_type' => DocumentVerificationRequest::SUPPORTED_FILE_FORMAT,
     'result' => $testResult,
   ]);
 });
