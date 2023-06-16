@@ -13,5 +13,5 @@ Project: document-verification-api
    - Add exclusive test case for DocumentVerificationResult model
    - Add negative test cases that accept data that doesn't match instead of just feeding with incomplete or missing data
 4. Add more validation, like custom validation for returned validation status.
-5. Separate document verification result into its own resource controller. 
+5. Separate document verification result CRUD into its own resource controller. 
 6. Add necessary and concise comments describing methods.
