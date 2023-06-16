@@ -8,11 +8,11 @@
 
 1. Clone this repository:
 
-    `git clone https://github.com/sittimunirahar/document-verification-api.git`
+        git clone https://github.com/sittimunirahar/document-verification-api.git
 
 2. Navigate to the Project Directory:
    
-    `cd document-verification-api`
+        cd document-verification-api
 
 3. Create and configure `.env` File:
 
@@ -31,7 +31,7 @@
 
     **Without Sail**
     
-    As mentioned in the Prerequisites, ensure you have the required dependencies (PHP, Composer, and a database) installed locally. 
+    As mentioned in the Prerequisites, ensure that you have the required dependencies (PHP, Composer, and a database) installed locally. 
     - Run the following command to install project dependencies:
     `composer install`
     - Start your local development server (e.g., Apache, Nginx) and configure it to point to the project's `public` directory.
@@ -47,15 +47,16 @@
       `php artisan migrate`
 
    - You can also directly run without running the `./vendor/bin/sail shell` command: 
+  
       `sail artisan migrate`
 
    **Without Sail**
 
      - Create your database 
-     - Configure it in the .env
+     - Configure it in the `.env`
      - Run the migrations:
    
-      `php artisan migrate`
+         `php artisan migrate`
 
 6. Access the application:
 
@@ -67,21 +68,32 @@
 
     - Visit the configured URL for your local development server (e.g., http://localhost or http://127.0.0.1) in your browser.
 
+
 ### Running Test
 
-1. Run feature test (covers the end-to-end document verification process)
-
+1. Running Test
+   
     **Sail (Without application container access):**
 
-    `./vendor/bin/sail test --filter "DocumentVerificationTest"`
+    
+        ./vendor/bin/sail test --filter "<TestName>"
 
     or 
 
-    `sail artisan test --filter DocumentVerificationTest`
+        sail artisan test --filter <TestName>
 
     **Sail (with application container access) or Without Sail:**
 
-    `php artisan test --filter DocumentVerificationTest`
+        php artisan test --filter <TestName> 
+
+    *Optional*
+    * Add `--coverage` to run coverage
+    * Remove `TestName` to run all test
+
+
+2. Feature test (covers the end-to-end document verification process)
+
+    **Test name:** DocumentVerificationTest
 
     **Test covers:**
     - authenticated user successfully verify document      
@@ -91,11 +103,31 @@
     - authenticated user only can submit file in json   
     - verification result stored in database
 
-2. Run unit test
+3. Unit tests
+   
+   **Test name:** DocumentVerificationServiceTest
+
+   **Test covers:**
+   - transforms file content to JSON
+   - verifies document
+   - formats verification data
+   - stores verification results 
+
+   **Test name:** DocumentValidationServiceTest
+
+   **Test covers:**
+   Tests\Unit\DocumentValidatorServiceTest
+   - document validation returns verified
+   - document validation returns invalid_recipient
+   - document validation returns invalid_issuer
+   - document validation returns invalid_signature
+
 
 ### Other Documentations
 
  - Refactoring or Improvement Plan: `ROADMAP.md`
- - Documentations:
-   - Document Verification API documentation: `docs/document_verification_api.md`
-   - Technical documentation: `docs/technical_documentation.md`
+ - Document Verification API documentation: `docs/document_verification_api.md`
+ - Technical documentations: in `docs/`
+    1. `Sequence Diagram.png`
+    2. `Verification Flowchart.png`
+    3. `Architecture Comparison Table.png`
