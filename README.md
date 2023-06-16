@@ -4,6 +4,8 @@
 - **If you are using Sail for local development:** Docker Desktop
 - **If you are not using Docker:** PHP, Composer and a database
 
+***
+
 ### Installation
 
 1. Clone this repository:
@@ -68,6 +70,7 @@
 
     - Visit the configured URL for your local development server (e.g., http://localhost or http://127.0.0.1) in your browser.
 
+***
 
 ### Running Test
 
@@ -122,6 +125,7 @@
    - document validation returns invalid_issuer
    - document validation returns invalid_signature
 
+***
 
 ### Other Documentations
 
