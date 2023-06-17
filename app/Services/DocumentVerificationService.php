@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Http\Requests\DocumentVerificationRequest;
+use App\DTOs\DocumentVerificationResult as DocumentVerificationResultDTO;
 use App\Models\DocumentVerificationResult;
 use App\Services\DocumentValidatorService;
 use Illuminate\Support\Facades\Auth;
@@ -17,17 +18,11 @@ class DocumentVerificationService
   {
   }
 
-  public function verify(DocumentVerificationRequest $request): array
+  public function verify(DocumentVerificationRequest $request): DocumentVerificationResultDTO
   {
     $requestData = $this->transformToJson($request);
 
     $result = $this->validatorService->validate($requestData);
-
-    $issuerName = $requestData['data']['issuer']['name'];
-    $verificationResult = [
-      'issuer' => $issuerName,
-      'result' => $result,
-    ];
 
     try {
       $this->storeResult($result);
@@ -35,7 +30,12 @@ class DocumentVerificationService
       $verificationResult['error'] = self::ERROR_STORE_RESULT;
     }
 
-    return $verificationResult;
+    $issuerName = $requestData['data']['issuer']['name'];
+
+    return new DocumentVerificationResultDTO(
+      $issuerName,
+      $result,
+    );
   }
 
   public function transformToJson(DocumentVerificationRequest $request): array

@@ -2,6 +2,7 @@
 
 include_once 'tests/TestConstants.php';
 
+use App\DTOs\DocumentVerificationResult as DocumentVerificationResultDTO;
 use App\Http\Requests\DocumentVerificationRequest;
 use App\Models\User;
 use App\Services\DocumentValidatorService;
@@ -9,7 +10,7 @@ use App\Services\DocumentVerificationService;
 use Illuminate\Http\UploadedFile;
 
 beforeEach(function () {
-  $this->validator = Mockery::mock(DocumentValidatorService::class);
+  $this->validator = new DocumentValidatorService();
   $this->service = new DocumentVerificationService($this->validator);
 
   $fileContent = json_encode(FORMATTED_DOCUMENT_DATA_COMPLETE);
@@ -27,14 +28,10 @@ test('transforms file content to JSON', function () {
 });
 
 test('verifies document', function () {
-  $this->validator
-    ->shouldReceive('validate')
-    ->once();
-
   $result = $this->service->verify($this->request);
-  $this->assertIsArray($result);
-  $this->assertArrayHasKey('issuer', $result);
-  $this->assertArrayHasKey('result', $result);
+  $this->assertInstanceOf(DocumentVerificationResultDTO::class, $result);
+  $this->assertEquals(EXPECTED_RESULT_VERIFIED['issuer'], $result->issuer);
+  $this->assertEquals(EXPECTED_RESULT_VERIFIED['result'], $result->result);
 });
 
 test('formats verification data', function () {
