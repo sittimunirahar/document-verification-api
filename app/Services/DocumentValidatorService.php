@@ -49,23 +49,19 @@ class DocumentValidatorService
 
   public function validateIssuer(array $verificationResource): DocumentValidationResult
   {
-    $issuer = $verificationResource['data']['issuer'] ?? '';
+    $issuer = $verificationResource['data']['issuer'] ?? null;
 
-    $issuerName = $issuer['name'] ?? null;
-    $identityProof = $issuer['identityProof'] ?? null;
-
-    $issuerValid = $issuerName && $identityProof;
-    $foundKey = false;
-
-    if (!$issuerValid) {
-      return new DocumentValidationResult($issuerValid, self::INVALID_ISSUER);
-    } else {
-      $key = $identityProof['key'];
-      $location = $identityProof['location'];
-
-      $foundKey = $this->dnsLookup($key, $location);
+    if (!$issuer || !isset($issuer['name'], $issuer['identityProof'])) {
+      return new DocumentValidationResult(false, self::INVALID_ISSUER);
     }
 
+    $identityProof = $issuer['identityProof'] ?? null;
+
+    if (!$identityProof || !isset($identityProof['key'], $identityProof['location'])) {
+      return new DocumentValidationResult(false, self::INVALID_ISSUER);
+    }
+
+    $foundKey = $this->dnsLookup($identityProof['key'], $identityProof['location']);
     $errorMessage = !$foundKey ? self::INVALID_ISSUER : '';
     return new DocumentValidationResult($foundKey, $errorMessage);
   }
