@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use GuzzleHttp\Client;
@@ -39,7 +41,7 @@ class DocumentValidatorService
   {
     $recipient = $verificationResource['data']['recipient'] ?? '';
 
-    $isValid = $recipient['name'] ?? null && $recipient['email'] ?? null;
+    $isValid = is_array($recipient) && ($recipient['name'] && $recipient['email']);
     $errorMessage = !$isValid ? self::INVALID_RECIPIENT : '';
 
     return new DocumentValidationResult($isValid, $errorMessage);
@@ -84,7 +86,7 @@ class DocumentValidatorService
     // Checks DNS records for provided key and returns validation result
     $promise->then(
       function ($response) use ($key, &$foundKey) {
-        $dnsRecords = json_decode($response->getBody(), true) ?? null;
+        $dnsRecords = json_decode($response->getBody()->getContents(), true) ?? '';
 
         if ($dnsRecords && isset($dnsRecords['Answer'])) {
           foreach ($dnsRecords['Answer'] as $record) {
