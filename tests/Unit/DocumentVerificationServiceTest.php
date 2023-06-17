@@ -27,8 +27,9 @@ test('transforms file content to JSON', function () {
     ->toBe($this->service->formatData($result));
 });
 
-test('verifies document', function () {
+test('verifies document and returns expected result', function () {
   $result = $this->service->verify($this->request);
+
   $this->assertInstanceOf(DocumentVerificationResultDTO::class, $result);
   $this->assertEquals(EXPECTED_RESULT_VERIFIED['issuer'], $result->issuer);
   $this->assertEquals(EXPECTED_RESULT_VERIFIED['result'], $result->result);

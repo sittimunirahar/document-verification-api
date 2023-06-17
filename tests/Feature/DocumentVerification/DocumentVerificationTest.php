@@ -19,7 +19,7 @@ beforeEach(function () {
   $this->file = UploadedFile::fake()->createWithContent('document.json', $fileContent);
 });
 
-test('authorized user able to verify document', function () {
+test('authorized user is able to verify document', function () {
   $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $this->file,
   ]);
@@ -34,7 +34,7 @@ test('authorized user able to verify document', function () {
     ->assertStatus(HTTP_POST_SUCCESS);
 });
 
-test('authorized user able to verify document with incomplete data', function () {
+test('authorized user is able to verify document with incomplete data', function () {
   $incompleteFileContent = json_encode(DOCUMENT_DATA_WITHOUT_ISSUER);
   $this->file = UploadedFile::fake()->createWithContent('document.json', $incompleteFileContent);
 
@@ -54,6 +54,7 @@ test('authorized user able to verify document with incomplete data', function ()
 
 test('authorized user is not allowed to upload file bigger than 2MB', function () {
   $file = UploadedFile::fake()->image('document.json', 3000, 3000)->size(DocumentVerificationRequest::MAX_FILE_SIZE + 1);
+
   $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $file,
   ]);
@@ -62,8 +63,9 @@ test('authorized user is not allowed to upload file bigger than 2MB', function (
     ->assertJson(EXPECTED_INVALID_FILE_SIZE_MESSAGE);
 });
 
-test('authorized user is only able to upload file in json', function () {
+test('authorized user is only allowed to upload file in json', function () {
   $file = UploadedFile::fake()->createWithContent('document.pdf', 'hello');
+
   $response = $this->postJson(DOCUMENT_VERIFICATION_API_URL, [
     'file' => $file,
   ]);
@@ -92,7 +94,6 @@ test('stores verification result in database', function () {
 
   $response
     ->assertStatus(HTTP_POST_SUCCESS);
-
   $this->assertDatabaseHas('verification_results', [
     'user_id' => $this->userId,
     'file_type' => DocumentVerificationRequest::SUPPORTED_FILE_FORMAT,
