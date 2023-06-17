@@ -63,6 +63,7 @@ class DocumentValidatorService
 
     $foundKey = $this->dnsLookup($identityProof['key'], $identityProof['location']);
     $errorMessage = !$foundKey ? self::INVALID_ISSUER : '';
+
     return new DocumentValidationResult($foundKey, $errorMessage);
   }
 

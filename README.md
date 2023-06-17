@@ -1,3 +1,22 @@
+## Document Verification API
+- [Document Verification API](#document-verification-api)
+  - [About](#about)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running Test](#running-test)
+  - [Other Documentations](#other-documentations)
+
+***
+### About
+
+This project was created for Accredify's Technical Assessment.
+
+The feature demonstrates a document verification API where an authenticated user sends a JSON file and receives a verification result as a response.
+
+The document is verified based on 3 conditions: valid issuer, recipient and signature. 
+
+Tech Stack: PHP 8, Laravel 10, MySQL, Docker: Laravel Sail, PHP Pest.
+
 ### Prerequisites
 
 - Git
@@ -99,10 +118,10 @@
     **Test name:** DocumentVerificationTest
 
     **Test covers:**
-    - authorized user able to verify document      
-    - authorized user able to verify document with incomplete data
+    - authorized user is able to verify document      
+    - authorized user is able to verify document with incomplete data
     - authorized user is not allowed to upload file bigger than 2MB
-    - authorized user is only able to upload file in json
+    - authorized user is only allowed to upload file in json
     - unauthorized user is not allowed to verify document
     - stores verification result in database
 
@@ -120,10 +139,10 @@
 
    **Test covers:**
    Tests\Unit\DocumentValidatorServiceTest
-   - document validation returns verified
-   - document validation returns invalid_recipient
-   - document validation returns invalid_issuer
-   - document validation returns invalid_signature
+   - validates document with complete data
+   - validates recipient with missing data
+   - validates issuer with missing data
+   - validates signature with missing data
 
 ***
 
