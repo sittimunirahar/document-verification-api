@@ -9,8 +9,6 @@
 ***
 ### About
 
-This project was created for Accredify's Technical Assessment.
-
 The feature demonstrates a document verification API where an authenticated user sends a JSON file and receives a verification result as a response.
 
 The document is verified based on 3 conditions: valid issuer, recipient and signature. 
