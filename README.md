@@ -15,6 +15,14 @@ The document is verified based on 3 conditions: valid issuer, recipient and sign
 
 Tech Stack: PHP 8, Laravel 10, MySQL, Docker: Laravel Sail, PHP Pest.
 
+ - Requirements Doc: [REQUIREMENTS.md](https://github.com/sittimunirahar/document-verification-api/blob/main/REQUIREMENTS.md)
+ - API Doc: [document_verification_api.md](https://github.com/sittimunirahar/document-verification-api/blob/main/docs/document_verification_api.md)
+ - Refactoring or Improvement Plan: [ROADMAP.md](https://github.com/sittimunirahar/document-verification-api/blob/main/ROADMAP.md)
+ - Technical documentations: in `docs/`
+    1. `Sequence Diagram.png`
+    2. `Verification Flowchart.png`
+    3. `Architecture Comparison Table.png`
+
 ### Prerequisites
 
 - Git
@@ -142,13 +150,3 @@ Tech Stack: PHP 8, Laravel 10, MySQL, Docker: Laravel Sail, PHP Pest.
    - validates issuer with missing data
    - validates signature with missing data
 
-***
-
-### Other Documentations
-
- - Refactoring or Improvement Plan: `ROADMAP.md`
- - Document Verification API documentation: `docs/document_verification_api.md`
- - Technical documentations: in `docs/`
-    1. `Sequence Diagram.png`
-    2. `Verification Flowchart.png`
-    3. `Architecture Comparison Table.png`
